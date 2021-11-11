@@ -50,9 +50,8 @@ local module = {
     end,
     do_stat = function(pro1, pro2)
         if config.get("has_stat") then
-            local pro1_t = s.iorunv("stat", {"-c", "%Y", pro1});
-            local pro2_t = s.iorunv("stat", {"-c", "%Y", pro2});
-
+            local pro1_t = os.iorunv("stat", {"-c", "%Y", pro1});
+            local pro2_t = os.iorunv("stat", {"-c", "%Y", pro2});
             return tonumber(pro1_t) > tonumber(pro2_t);
         else
             return true;
