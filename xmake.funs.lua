@@ -52,7 +52,7 @@ local module = {
         if config.get("has_stat") then
             return tonumber(os.iorunv("stat", {"-c", "%Y", pro1})) > tonumber(os.iorunv("stat", {"-c", "%Y", pro2}));
         else
-            return false;
+            return true;
         end
     end
 };
