@@ -21,7 +21,7 @@ function need(target, packages, programs)
         local package = find_packages(v);
 
         if #package == 0 then
-            cprint("${red} Fail: ", v);
+            cprint("${red} Fail: " .. v);
 
             if not is_optional then
                 is_ok = false;
