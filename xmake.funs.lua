@@ -12,13 +12,24 @@ function need(target, packages, programs)
     local is_ok = true;
 
     for _, v in ipairs(packages) do
+        local is_optional = v:sub(1,1) == "+";
+
+        if is_optional then
+            v = v:sub(2);
+        end
+
         local package = find_packages(v);
 
         if #package == 0 then
-            vprint("${red} Fail: ", v);
-            is_ok = false;
+            cprint("${red} Fail: ", v);
+
+            if not is_optional then
+                is_ok = false;
+            end
         else
-            target:add(package);
+            if not is_optional then
+                target:add(package);
+            end
         end
     end
 
