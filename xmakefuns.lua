@@ -1,3 +1,4 @@
+import("net.http")
 import("lib.detect.find_program")
 import("core.project.config")
 config.load()
@@ -66,5 +67,23 @@ function do_stat(pro1, pro2)
         return tonumber(pro1_t) > tonumber(pro2_t);
     else
         return true;
+    end
+end
+
+function downfile(url, out_name)
+
+    local my_repo = "https://cdn.jsdelivr.net/gh/q962/xmake_funs/"
+
+    if not url:startswith("http") then
+        out_name = url .. ".lua"
+        url = my_repo .. out_name;
+    end
+
+    if not os.isfile("./.xmake/" .. out_name) then
+        http.download(url, ".xmake/" .. out_name);
+        if not os.isfile("./.xmake/" .. out_name) then
+            print("download fail: " .. url ..out_name);
+            os.exit();
+        end
     end
 end
