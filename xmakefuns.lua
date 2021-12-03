@@ -87,3 +87,13 @@ function downfile(url, out_name)
         end
     end
 end
+
+function main()
+    config.load(".config")
+    local PKG_CONFIG_PATH = config.get("PKG_CONFIG_PATH");
+    if  PKG_CONFIG_PATH and #PKG_CONFIG_PATH > 0 then
+        for i=1, #PKG_CONFIG_PATH do
+            os.addenv("PKG_CONFIG_PATH", PKG_CONFIG_PATH[i])
+        end
+    end
+end
