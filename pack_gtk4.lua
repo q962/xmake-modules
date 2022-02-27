@@ -2,10 +2,12 @@ import("lib.detect.find_program")
 import("core.project.config")
 config.load()
 
-function pack_gtk4(target)
+--! \brief 打包gtk4 程序
+function pack_gtk4(self, target)
     local dllsuffix = is_host("windows") and ".dll" or ".so";
     local exesuffix = is_host("windows") and ".exe" or "";
 
+    local installdir = target:installdir()
     local pkg_vars = config.get("pkg_vars") or {};
     if #pkg_vars == 0 then
         for packagename, vars in pairs({
@@ -55,11 +57,11 @@ function pack_gtk4(target)
         get_dll_deps(dep_path);
 
         for v, _ in pairs(dep_dlls) do
-            if not os.isfile(path.join(target:installdir(), "bin", path.filename(v))) then
+            if not os.isfile(path.join(installdir, "bin", path.filename(v))) then
                 if is_plat("mingw") then
-                    os.cp(path.join(config.get("mingw"), "..", v), path.join(target:installdir(), "bin") .. "/");
+                    os.cp(path.join(config.get("mingw"), "..", v), path.join(installdir, "bin") .. "/");
                 else
-                    os.cp(v, path.join(target:installdir(), "bin") .. "/");
+                    os.cp(v, path.join(installdir, "bin") .. "/");
                 end
             end
         end
@@ -76,22 +78,22 @@ function pack_gtk4(target)
     end
 
     -- gdbus
-    cp(pkg_vars["gio-2.0"].gdbus .. exesuffix, path.join(target:installdir(), "bin") .. "/");
+    cp(pkg_vars["gio-2.0"].gdbus .. exesuffix, path.join(installdir, "bin") .. "/");
     find_dep(pkg_vars["gio-2.0"].gdbus .. exesuffix)
     -- gtk dep file
-    cp(path.join(pkg_vars.gtk4.prefix, "share", "gtk-4.0"), path.join(target:installdir(), "share") .. "/");
+    cp(path.join(pkg_vars.gtk4.prefix, "share", "gtk-4.0"), path.join(installdir, "share") .. "/");
     -- gstreamer
     local module_gstreamer_path = path.join(pkg_vars.gtk4.prefix, "lib", "gtk-4.0", "4.0.0", "media", "libmedia-gstreamer" .. dllsuffix);
     cp(
         module_gstreamer_path,
-        path.join(target:installdir(), "lib", "gtk-4.0", "4.0.0", "media", "libmedia-gstreamer") .. "/"
+        path.join(installdir, "lib", "gtk-4.0", "4.0.0", "media", "libmedia-gstreamer") .. "/"
     );
     find_dep(module_gstreamer_path)
     -- gdk dep file
     cp(
         path.join(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix),
         path.join(
-            target:installdir(),
+            installdir,
             path.relative(
                 pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir,
                 pkg_vars["gdk-pixbuf-2.0"].prefix)
@@ -104,7 +106,7 @@ function pack_gtk4(target)
     cp(
         pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_cache_file,
         path.join(
-            target:installdir(),
+            installdir,
             path.relative(
                 pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_binarydir,
                 pkg_vars["gdk-pixbuf-2.0"].prefix)
@@ -113,17 +115,17 @@ function pack_gtk4(target)
     -- mo file
     cp(
         path.join(pkg_vars["gdk-pixbuf-2.0"].prefix, "share", "locale", "zh_CN", "LC_MESSAGES", "gtk40.mo"),
-        path.join(target:installdir(), "share", "locale", "zh_CN", "LC_MESSAGES") .. "/"
+        path.join(installdir, "share", "locale", "zh_CN", "LC_MESSAGES") .. "/"
     );
     cp(
         path.join(pkg_vars["gdk-pixbuf-2.0"].prefix, "share", "locale", "zh_CN", "LC_MESSAGES", "gtk40-properties.mo"),
-        path.join(target:installdir(), "share", "locale", "zh_CN", "LC_MESSAGES") .. "/"
+        path.join(installdir, "share", "locale", "zh_CN", "LC_MESSAGES") .. "/"
     );
     -- cp glib dep file
     cp(
         path.join(pkg_vars["gio-2.0"].schemasdir, "gschemas.compiled"),
         path.join(
-            target:installdir(),
+            installdir,
             path.relative(
                 pkg_vars["gio-2.0"].schemasdir,
                 pkg_vars["gio-2.0"].prefix)
@@ -133,7 +135,7 @@ function pack_gtk4(target)
     cp(
         pkg_vars["gio-2.0"].giomoduledir,
         path.join(
-            target:installdir(),
+            installdir,
             path.relative(
                 pkg_vars["gio-2.0"].giomoduledir,
                 pkg_vars["gio-2.0"].prefix),
@@ -148,11 +150,11 @@ function pack_gtk4(target)
     -- if is_plat("mingw") then
     --     cp(
     --         path.join(config.get("mingw"), "share", "icons", "Adwaita"),
-    --         path.join(target:installdir(), "share", "icons") .. "/"
+    --         path.join(installdir, "share", "icons") .. "/"
     --     );
     --     cp(
     --         path.join(config.get("mingw"), "share", "icons", "hicolor"),
-    --         path.join(target:installdir(), "share", "icons") .. "/"
+    --         path.join(installdir, "share", "icons") .. "/"
     --     );
     -- else
     --     os.raise("需要手动指定 Adwaita\\hicolor 主题所在目录")

@@ -3,7 +3,11 @@ import("lib.detect.find_program")
 import("core.project.config")
 config.load()
 
-function need(target, packages, programs)
+--[[!
+  编译需要的依赖库和工具
+  如果以 '*' 开头，则表示必须，找不到报错，停止编译。
+]]
+function need(self, target, packages, programs)
 
     packages = packages and packages or {};
     programs = programs and programs or {};
@@ -60,7 +64,13 @@ function need(target, packages, programs)
 
 end
 
-function do_stat(pro1, pro2)
+--[[!
+  对比两个文件的更新时间
+  \retval true  如果没有 stat 命令
+  \retval true  pro1 修改日期大于 pro2
+  \retval false 否则反之
+]]
+function do_stat(self, pro1, pro2)
     if config.get("has_stat") then
         local pro1_t = os.iorunv("stat", {"-c", "%Y", pro1});
         local pro2_t = os.iorunv("stat", {"-c", "%Y", pro2});
@@ -70,8 +80,12 @@ function do_stat(pro1, pro2)
     end
 end
 
-function downfile(url, out_name)
+--[[!
+  下载文件，到项目目录下的 .xmake 文件夹中。
 
+  如果不是 http  开头则解释为下载本项目下的同名模块
+]]
+function downfile(self, url, out_name)
     local my_repo = "https://cdn.jsdelivr.net/gh/q962/xmake_funs/"
 
     if not url:startswith("http") then
@@ -88,6 +102,18 @@ function downfile(url, out_name)
     end
 end
 
+--[[!
+  加载模块
+
+  会自动下载库中的模块
+]]
+function loadmodule(self, module_name)
+
+    downfile(self, module_name)
+
+    table.join2(self, import(module_name, {anonymous=true, rootdir= ".xmake"}))
+end
+
 function main()
     config.load(".config")
     local PKG_CONFIG_PATH = config.get("PKG_CONFIG_PATH");
@@ -97,3 +123,5 @@ function main()
         end
     end
 end
+
+main()
