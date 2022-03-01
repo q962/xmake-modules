@@ -3,6 +3,7 @@ import("core.project.config")
 config.load()
 
 --! \brief 打包gtk4 程序
+--! \see https://gitlab.gnome.org/GNOME/gtk/-/blob/main/docs/reference/gtk/running.md
 function pack_gtk4(self, target)
     local dllsuffix = is_host("windows") and ".dll" or ".so";
     local exesuffix = is_host("windows") and ".exe" or "";
