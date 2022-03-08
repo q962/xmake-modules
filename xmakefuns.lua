@@ -115,7 +115,7 @@ function loadmodule(self, module_name)
 end
 
 function main()
-    config.load(".config")
+    config.load(".xmake.config")
     local PKG_CONFIG_PATH = config.get("PKG_CONFIG_PATH");
     if  PKG_CONFIG_PATH and #PKG_CONFIG_PATH > 0 then
         for i=1, #PKG_CONFIG_PATH do
