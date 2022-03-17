@@ -93,9 +93,9 @@ function downfile(self, url, out_name)
         url = my_repo .. out_name;
     end
 
-    if not os.isfile("./.xmake/" .. out_name) then
-        http.download(url, ".xmake/" .. out_name);
-        if not os.isfile("./.xmake/" .. out_name) then
+    if not os.isfile("./.xmake.modules/" .. out_name) then
+        http.download(url, ".xmake.modules/" .. out_name);
+        if not os.isfile("./.xmake.modules/" .. out_name) then
             print("download fail: " .. url ..out_name);
             os.exit();
         end
@@ -111,7 +111,7 @@ function loadmodule(self, module_name)
 
     downfile(self, module_name)
 
-    table.join2(self, import(module_name, {anonymous=true, rootdir= ".xmake"}))
+    table.join2(self, import(module_name, {anonymous=true, rootdir= ".xmake.modules"}))
 end
 
 function main()
