@@ -14,7 +14,12 @@ local funs = {
 
         local res_xml_path = path.join(res_path_bak, "res.xml")
 
+        local exist_res_xml = true;
+
         if not os.isfile(res_xml_path) then
+
+            exist_res_xml = false;
+
             local template = format([[
             <?xml version="1.0" encoding="UTF-8"?>
             <gresources>
@@ -39,6 +44,10 @@ local funs = {
 
         os.exec(format("glib-compile-resources --generate-header --sourcedir %s %s/res.xml --target src/res.h", res_path_bak, res_path_bak))
         os.exec(format("glib-compile-resources --generate-source --sourcedir %s %s/res.xml --target src/res.c", res_path_bak, res_path_bak))
+
+        if not exist_res_xml then
+            os.rm(res_xml_path)
+        end
     end
 };
 
