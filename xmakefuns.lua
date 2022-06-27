@@ -87,6 +87,7 @@ end
 ]]
 function downfile(self, url, out_name)
     local my_repo = "https://cdn.jsdelivr.net/gh/q962/xmake_funs/"
+    local module_name = url;
 
     if not url:startswith("http") then
         out_name = url .. ".lua"
@@ -94,6 +95,7 @@ function downfile(self, url, out_name)
     end
 
     if not os.isfile("./.xmake.modules/" .. out_name) then
+        print("load module: " .. module_name " ..." )
         http.download(url, ".xmake.modules/" .. out_name);
         if not os.isfile("./.xmake.modules/" .. out_name) then
             print("download fail: " .. url ..out_name);
