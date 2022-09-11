@@ -15,6 +15,8 @@ function need(self, target, packages, programs)
     if #packages == 0 or #programs == 0 then return end
 
     local is_ok = true;
+    local libpaths = {}
+    local libpath_count = 0
 
     for _, v in ipairs(packages) do
         local is_optional = v:sub(1,1) == "+";
@@ -34,8 +36,25 @@ function need(self, target, packages, programs)
         else
             if not is_optional then
                 target:add(package);
+                local linkdirs = package[1].linkdirs
+                for linkdir_index, linkdir in ipairs(linkdirs) do
+                    if libpaths[libdir] == nil then
+                        libpaths[linkdir] = libpath_count
+                        libpath_count = libpath_count + 1
+                    end
+                end
             end
         end
+    end
+
+    local libpathlist = {}
+    for libpath, index in pairs(libpaths) do
+        libpathlist[index+1] = libpath
+    end
+    if #libpathlist ~= 0 then
+        table.insert(libpathlist, '$ORIGIN/../lib')
+        table.insert(libpathlist, '$ORIGIN/../lib/x86_64-linux-gnu')
+        target:add('rpathdirs',table.concat(libpathlist, ':'))
     end
 
     for _, v in ipairs(programs) do
@@ -87,7 +106,6 @@ end
 ]]
 function downfile(self, url, out_name)
     local my_repo = "https://cdn.jsdelivr.net/gh/q962/xmake_funs/"
-    local module_name = url;
 
     if not url:startswith("http") then
         out_name = url .. ".lua"
@@ -95,7 +113,6 @@ function downfile(self, url, out_name)
     end
 
     if not os.isfile("./.xmake.modules/" .. out_name) then
-        print("load module: " .. module_name " ..." )
         http.download(url, ".xmake.modules/" .. out_name);
         if not os.isfile("./.xmake.modules/" .. out_name) then
             print("download fail: " .. url ..out_name);
