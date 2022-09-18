@@ -12,42 +12,46 @@ local funs = {
             os.exit(1);
         end
 
-        local res_xml_path = path.join(res_path_bak, "res.xml")
-
-        local exist_res_xml = true;
-
-        if not os.isfile(res_xml_path) then
-
-            exist_res_xml = false;
-
-            local template = format([[
-            <?xml version="1.0" encoding="UTF-8"?>
-            <gresources>
-            <gresource prefix="/%s">
-            ]], (APPID:gsub("%.", "/")));
-
-            for _, file_path in ipairs(os.files(res_path)) do
-                file_path = path.relative(file_path, res_path_bak):gsub("\\", "/")
-
-                if file_path:find("res.xml") then goto continue; end
-
-                template = template .. '    <file compressed="true">'.. file_path:sub(1) .. '</file>\n';
-
-                ::continue::
+        local res_xml_path   = path.join(res_path_bak, "res.xml")
+        local filters = {}
+        try {
+            function()
+                for fileter in io.lines(path.join(res_path_bak, "res.filter")) do
+                    local fileter = string.trim(fileter)
+                    if #fileter and fileter:sub(1,1) ~= '#' then
+                        table.insert(filters, fileter)
+                    end
+                end
             end
+        }
 
-            template = template ..[[  </gresource>
-            </gresources>]];
+        local template = format([[
+<?xml version="0.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/%s">
+]], (APPID:gsub("%.", "/")));
 
-            io.writefile(res_xml_path, template)
+        for _, file_path in ipairs(os.files(res_path)) do
+            local relative_path = path.relative(file_path, res_path_bak)
+            file_path = relative_path:gsub("\\", "/")
+
+            for _, filter in ipairs(filters) do
+                local s = filter:split('\t')
+                filter = s[1]
+                local field = s[2] ~= nil and s[2] or ''
+
+                if file_path:match( filter ) ~= nil then
+                    template = template .. '    <file compressed="true" '..field..'>'.. file_path:sub(1) .. '</file>\n';
+                end
+            end
         end
+
+        template = template .."  </gresource>\n</gresources>";
+
+        io.writefile(res_xml_path, template)
 
         os.exec(format("glib-compile-resources --generate-header --sourcedir %s %s/res.xml --target src/res.h", res_path_bak, res_path_bak))
         os.exec(format("glib-compile-resources --generate-source --sourcedir %s %s/res.xml --target src/res.c", res_path_bak, res_path_bak))
-
-        if not exist_res_xml then
-            os.rm(res_xml_path)
-        end
     end
 };
 
