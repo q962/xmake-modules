@@ -7,7 +7,7 @@ local funs = {
         res_path = res_path .. "/**"
 
         local APPID = config.get("APPID")
-        if  not #APPID then
+        if not APPID or not #APPID then
             cprint("lost APPID")
             os.exit(1);
         end
