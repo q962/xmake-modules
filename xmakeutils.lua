@@ -86,7 +86,7 @@ end
 function check_programs( programs)
     if not programs then return end
 
-    local is_ok = false;
+    local is_ok = true;
 
     for _, v in ipairs(programs) do
         local is_must = v:sub(1,1) == "*";
