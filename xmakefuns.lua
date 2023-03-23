@@ -83,6 +83,36 @@ function need(self, target, packages, programs)
 
 end
 
+function check_programs( programs)
+    if not programs then return end
+
+    local is_ok = false;
+
+    for _, v in ipairs(programs) do
+        local is_must = v:sub(1,1) == "*";
+
+        if is_must then
+            v = v:sub(2);
+        end
+
+        if not find_program( v ) then
+            if is_must then
+                is_ok = false;
+                cprint("${red}[必须] 缺少 " .. v);
+            else
+                cprint("[非必须] 缺少 " .. v);
+            end
+        else
+            config.set("has_" .. v, true);
+            config.save();
+        end
+    end
+
+    if not is_ok then
+        os.exit();
+    end
+end
+
 --[[!
   对比两个文件的更新时间
   \retval true  如果没有 stat 命令
