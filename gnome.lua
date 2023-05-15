@@ -216,3 +216,7 @@ function pack_gtk4(self, target)
     -- 如果是安装程序，最好使用 lnk 文件，隐藏目录结构。
     -- win32 上在 <install> 目录下放置 lnk 文件
 end
+
+function compile_schemas( schema_path )
+    os.runv("glib-compile-schemas", { schema_path })
+end
