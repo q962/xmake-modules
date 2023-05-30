@@ -78,7 +78,7 @@ function need(self, target, packages, programs)
     end
 
     if not is_ok then
-        os.exit();
+        os.exit(false);
     end
 
 end
