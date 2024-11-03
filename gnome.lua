@@ -113,13 +113,13 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     find_deps(target:targetfile(), bin_outpath);
     find_deps(pkg_vars["gio-2.0"].gdbus .. exesuffix, bin_outpath);
 
-    local function cp(a, b)
+    local function cp(a, b, opt)
         a = a:gsub("\\", "/");
 
         b = path.relative(b, vformat("$(projectdir)"))
 
         try {function()
-            os.cp(a, b);
+            os.cp(a, b, opt);
             cprint("copy " .. a .. " ==> " .. b);
         end, catch {function()
             cprint("${red}copy " .. a .. "==> " .. b);
@@ -150,8 +150,11 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
         }
     })
     -- mo file
-    cp(path.join(pkg_vars["gtk4"].prefix, "share", "locale", "zh_CN", "LC_MESSAGES", "gtk40.mo"),
-        path.join(installdir, "share", "locale", "zh_CN", "LC_MESSAGES") .. "/");
+    local locale_path = path.join(installdir, "share", "locale");
+    os.mkdir(locale_path)
+    cp(path.join(pkg_vars["gtk4"].prefix, "share", "locale", "*", "LC_MESSAGES", "gtk40.mo"), locale_path, {
+        rootdir = path.join(pkg_vars["gtk4"].prefix, "share", "locale")
+    });
     -- cp gio dep file
     local schemas_path =
         path.join(installdir, path.relative(pkg_vars["gio-2.0"].schemasdir, pkg_vars["gio-2.0"].prefix)) .. "/"
