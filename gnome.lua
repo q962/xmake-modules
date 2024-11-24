@@ -173,7 +173,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     end
     -- cp Adwaita
     if is_subhost("msys") then
-        _prefix = os.getenv("MINGW_PREFIX")
+        _prefix = os.getenv("MSYSTEM_PREFIX")
     end
 
     if _prefix then
