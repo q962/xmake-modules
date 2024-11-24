@@ -116,6 +116,10 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     local function cp(a, b, opt)
         a = a:gsub("\\", "/");
 
+        if( b:endswith("/"))then
+            os.mkdir(b)
+        end
+
         b = path.relative(b, vformat("$(projectdir)"))
 
         try {function()
