@@ -93,6 +93,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     local dllsuffix = is_host("windows") and ".dll" or ".so";
     local exesuffix = is_host("windows") and ".exe" or "";
 
+    local _prefix; -- 数据来源的路径前缀
     local installdir = path.absolute(target:installdir())
     bin_outpath = bin_outpath or (installdir .. "/bin/")
     lib_outpath = lib_outpath or (installdir .. "/lib/")
@@ -148,9 +149,9 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     end
     os.execv("gdk-pixbuf-query-loaders", {}, {
         stdout = gdk_pixbuf_moduledir .. "/../loaders.cache",
-        curdir = lib_outpath,
+        curdir = installdir,
         envs = {
-            GDK_PIXBUF_MODULEDIR = "../" .. gdk_pixbuf_moduledir_relative
+            GDK_PIXBUF_MODULEDIR = gdk_pixbuf_moduledir_relative
         }
     })
     -- mo file
@@ -170,6 +171,15 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     for _, v in ipairs(os.files(path.join(pkg_vars["gio-2.0"].giomoduledir, "*" .. dllsuffix))) do
         find_deps(v, bin_outpath);
     end
+    -- cp Adwaita
+    if is_subhost("msys") then
+        _prefix = os.getenv("MINGW_PREFIX")
+    end
+
+    if _prefix then
+        cp(_prefix .. "/share/icons/Adwaita", installdir .. "/share/icons/")
+    end
+
 end
 
 function compile_schemas(schema_path, out_path)
