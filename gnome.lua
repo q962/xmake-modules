@@ -142,7 +142,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
         pkg_vars["gdk-pixbuf-2.0"].prefix)
     local gdk_pixbuf_moduledir = path.join(installdir, gdk_pixbuf_moduledir_relative) .. "/"
 
-    cp(path.join(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "libpixbufloader-*" .. dllsuffix),
+    cp(path.join(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix),
         gdk_pixbuf_moduledir);
     for _, v in ipairs(os.files(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix)) do
         find_deps(v, bin_outpath);
