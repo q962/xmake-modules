@@ -123,12 +123,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
 
         b = path.relative(b, vformat("$(projectdir)"))
 
-        try {function()
-            os.cp(a, b, opt);
-            cprint("copy " .. a .. " ==> " .. b);
-        end, catch {function()
-            cprint("${red}copy " .. a .. "==> " .. b);
-        end}}
+        os.cp(a, b, opt);
     end
 
     -- gdbus
@@ -162,13 +157,14 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     });
     -- cp gio dep file
     local schemas_path =
-        path.join(installdir, path.relative(pkg_vars["gio-2.0"].schemasdir, pkg_vars["gio-2.0"].prefix)) .. "/"
+        path.join(installdir, path.relative(pkg_vars["gio-2.0"].schemasdir, pkg_vars["gio-2.0"].prefix))
     cp(path.join(pkg_vars["gio-2.0"].schemasdir, "org.gtk.gtk4.*"), schemas_path);
     compile_schemas(schemas_path);
     -- cp gio dep file
-    cp(pkg_vars["gio-2.0"].giomoduledir,
-        path.join(installdir, path.relative(pkg_vars["gio-2.0"].giomoduledir, pkg_vars["gio-2.0"].prefix), "..") .. "/");
-    for _, v in ipairs(os.files(path.join(pkg_vars["gio-2.0"].giomoduledir, "*" .. dllsuffix))) do
+    local giomoduledir = pkg_vars["gio-2.0"].giomoduledir
+    local out_giomoduledir = path.join(installdir, path.relative(giomoduledir, pkg_vars["gio-2.0"].prefix))
+    cp(giomoduledir, out_giomoduledir);
+    for _, v in ipairs(os.files(path.join(giomoduledir, "*" .. dllsuffix))) do
         find_deps(v, bin_outpath);
     end
     -- cp Adwaita
