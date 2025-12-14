@@ -184,7 +184,7 @@ function compile_schemas(schema_path, out_path)
 end
 
 function compile_resources(target, name, resources_path, opt)
-    local buildir = vformat("$(buildir)/")
+    local buildir = vformat("$(builddir)/")
 
     import("xmake-modules.utils")
 
