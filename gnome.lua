@@ -186,7 +186,7 @@ end
 function compile_resources(target, name, resources_path, opt)
     local buildir = vformat("$(builddir)/")
 
-    import("xmake-modules.utils")
+    import("utils")
 
     local resources_c_path = buildir .. "/gresources/" .. name .. ".c"
     os.mkdir(buildir .. "/gresources/")
