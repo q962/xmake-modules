@@ -56,9 +56,9 @@ do
 
         import("core.base.xml")
 
-        local sep = is_subhost("windows") and ";" or ":"
+        local sep = is_host("windows") and ";" or ":"
 
-        local G_RESOURCE_OVERLAYS = ""
+        local G_RESOURCE_OVERLAYS = {}
 
         for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
             local gresource = xml.loadfile(filepath)
@@ -78,12 +78,8 @@ do
 
                             local res_path = prefix .. "/" .. (alias and alias or file_path)
 
-                            if #G_RESOURCE_OVERLAYS > 0 then
-                                G_RESOURCE_OVERLAYS = G_RESOURCE_OVERLAYS .. sep
-                            end
-
-                            G_RESOURCE_OVERLAYS = G_RESOURCE_OVERLAYS .. res_path .. "=" ..
-                                                      path.absolute(file_path, target:scriptdir() .. "/res/");
+                            table.insert(G_RESOURCE_OVERLAYS,
+                                res_path .. "=" .. path.absolute(file_path, target:scriptdir() .. "/res/"))
                         end
                     end
                 end
