@@ -26,7 +26,7 @@ do
             for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
                 local basename = path.basename(path.basename(filepath))
 
-                gnome.compile_resources(target, basename, filepath, {"--manual-register"})
+                gnome.compile_resources(target, basename, filepath, {})
             end
         end
 
