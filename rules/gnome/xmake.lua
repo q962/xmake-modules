@@ -99,6 +99,7 @@ do
     end)
 
     after_install(function(target)
+        local gnome = import("../../gnome")
 
         local installdir = path.absolute(target:installdir()) .. '/'
         local installdir_share = path.join(installdir, "share") .. '/'
