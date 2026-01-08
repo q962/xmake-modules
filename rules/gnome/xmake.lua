@@ -21,21 +21,20 @@ do
                 prefixdir = "share"
             })
         end
+
+        if not is_mode("debug") then
+            for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
+                local basename = path.basename(path.basename(filepath))
+
+                gnome.compile_resources(target, basename, filepath, {"--manual-register"})
+            end
+        end
+
     end)
 
     before_build(function(target)
         local gnome = import("../../gnome")
         local utils = import("../../utils")
-
-        for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
-            local basename = path.basename(path.basename(filepath))
-
-            if is_mode("release") then
-                gnome.compile_resources(target, basename, filepath, {"--manual-register"})
-            else
-                target:add("defines", basename .. "_register_resource=void " .. basename .. "_register_resource")
-            end
-        end
 
         if get_config("APPID") then
             for _, filepath in ipairs(os.files(target:scriptdir() .. "/po/*.po")) do
@@ -56,38 +55,39 @@ do
 
         import("core.base.xml")
 
-        local sep = is_host("windows") and ";" or ":"
+        if is_mode("debug") then
+            local sep = is_host("windows") and ";" or ":"
+            local G_RESOURCE_OVERLAYS = {}
 
-        local G_RESOURCE_OVERLAYS = {}
+            for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
+                local gresource = xml.loadfile(filepath)
 
-        for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
-            local gresource = xml.loadfile(filepath)
+                for gresource_index in ipairs(gresource.children) do
+                    local gresource_value = gresource.children[gresource_index]
+                    if (gresource_value.name == "gresource") then
 
-            for gresource_index in ipairs(gresource.children) do
-                local gresource_value = gresource.children[gresource_index]
-                if (gresource_value.name == "gresource") then
+                        local prefix = gresource_value.attrs.prefix;
 
-                    local prefix = gresource_value.attrs.prefix;
+                        for file_index in ipairs(gresource_value.children) do
+                            local file_value = gresource_value.children[file_index]
+                            if (file_value.name == "file") then
+                                local file_path = file_value.children[1].text;
 
-                    for file_index in ipairs(gresource_value.children) do
-                        local file_value = gresource_value.children[file_index]
-                        if (file_value.name == "file") then
-                            local file_path = file_value.children[1].text;
+                                local alias = file_value.attrs and file_value.attrs.alias or nil;
 
-                            local alias = file_value.attrs and file_value.attrs.alias or nil;
+                                local res_path = prefix .. "/" .. (alias and alias or file_path)
 
-                            local res_path = prefix .. "/" .. (alias and alias or file_path)
-
-                            table.insert(G_RESOURCE_OVERLAYS,
-                                res_path .. "=" .. path.absolute(file_path, target:scriptdir() .. "/res/"))
+                                table.insert(G_RESOURCE_OVERLAYS,
+                                    res_path .. "=" .. path.absolute(file_path, target:scriptdir() .. "/res/"))
+                            end
                         end
                     end
                 end
             end
-        end
 
-        if #G_RESOURCE_OVERLAYS > 0 then
-            target:add("runenvs", "G_RESOURCE_OVERLAYS", G_RESOURCE_OVERLAYS)
+            if #G_RESOURCE_OVERLAYS > 0 then
+                target:add("runenvs", "G_RESOURCE_OVERLAYS", G_RESOURCE_OVERLAYS)
+            end
         end
 
         if not os.isfile(target:scriptdir() .. "/res/glib-2.0/schemas/gschemas.compiled") then
