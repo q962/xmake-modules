@@ -117,7 +117,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     local function cp(a, b, opt)
         a = a:gsub("\\", "/");
 
-        if( b:endswith("/"))then
+        if (b:endswith("/")) then
             os.mkdir(b)
         end
 
@@ -137,8 +137,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
         pkg_vars["gdk-pixbuf-2.0"].prefix)
     local gdk_pixbuf_moduledir = path.join(installdir, gdk_pixbuf_moduledir_relative) .. "/"
 
-    cp(path.join(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix),
-        gdk_pixbuf_moduledir);
+    cp(path.join(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix), gdk_pixbuf_moduledir);
     for _, v in ipairs(os.files(pkg_vars["gdk-pixbuf-2.0"].gdk_pixbuf_moduledir, "*" .. dllsuffix)) do
         find_deps(v, bin_outpath);
     end
@@ -154,6 +153,7 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
         path.join(installdir, path.relative(pkg_vars["gio-2.0"].schemasdir, pkg_vars["gio-2.0"].prefix))
     cp(path.join(pkg_vars["gio-2.0"].schemasdir, "org.gtk.gtk4.*"), schemas_path);
     compile_schemas(schemas_path);
+    os.rm(schemas_path .. "/*.gschema")
     -- cp gio dep file
     local giomoduledir = pkg_vars["gio-2.0"].giomoduledir
     local out_giomoduledir = path.join(installdir, path.relative(giomoduledir, pkg_vars["gio-2.0"].prefix))
