@@ -149,12 +149,6 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
             GDK_PIXBUF_MODULEDIR = gdk_pixbuf_moduledir_relative
         }
     })
-    -- mo file
-    local locale_path = path.join(installdir, "share", "locale");
-    os.mkdir(locale_path)
-    cp(path.join(pkg_vars["gtk4"].prefix, "share", "locale", "*", "LC_MESSAGES", "gtk40.mo"), locale_path, {
-        rootdir = path.join(pkg_vars["gtk4"].prefix, "share", "locale")
-    });
     -- cp gio dep file
     local schemas_path =
         path.join(installdir, path.relative(pkg_vars["gio-2.0"].schemasdir, pkg_vars["gio-2.0"].prefix))
@@ -167,15 +161,6 @@ function pack_gtk4(target, bin_outpath, lib_outpath, share_outpath)
     for _, v in ipairs(os.files(path.join(giomoduledir, "*" .. dllsuffix))) do
         find_deps(v, bin_outpath);
     end
-    -- cp Adwaita
-    if is_subhost("msys") then
-        _prefix = os.getenv("MSYSTEM_PREFIX")
-    end
-
-    if _prefix then
-        cp(_prefix .. "/share/icons/Adwaita", installdir .. "/share/icons/")
-    end
-
 end
 
 function compile_schemas(schema_path, out_path)
