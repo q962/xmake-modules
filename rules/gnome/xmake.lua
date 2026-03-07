@@ -22,12 +22,10 @@ do
             })
         end
 
-        if not is_mode("debug") then
-            for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
-                local basename = path.basename(path.basename(filepath))
+        for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
+            local basename = path.basename(path.basename(filepath))
 
-                gnome.compile_resources(target, basename, filepath, {})
-            end
+            gnome.compile_resources(target, basename, filepath, {})
         end
 
     end)
