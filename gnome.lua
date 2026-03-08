@@ -172,16 +172,54 @@ function compile_resources(target, name, resources_path, opt)
     local buildir = vformat("$(builddir)/")
 
     import("utils")
+    import("core.base.xml")
 
     local resources_c_path = buildir .. "/gresources/" .. name .. ".c"
     os.mkdir(buildir .. "/gresources/")
 
-    utils.mtimedo(resources_path, resources_c_path, function()
-        os.execv("glib-compile-resources",
-            table.join(
-                {"--generate-source", "--sourcedir=" .. path.directory(resources_path), "--target=" .. resources_c_path,
-                 resources_path}, opt))
-    end)
+    local resource_files = {}
+    table.insert(resource_files, path.absolute(resources_path))
+
+    local gresource_xml = xml.loadfile(resources_path)
+
+    for gresource_index in ipairs(gresource_xml.children) do
+        local gresource_value = gresource_xml.children[gresource_index]
+        if (gresource_value.name == "gresource") then
+
+            local prefix = gresource_value.attrs.prefix;
+
+            for file_index in ipairs(gresource_value.children) do
+                local file_value = gresource_value.children[file_index]
+                if (file_value.name == "file") then
+                    local file_path = file_value.children[1].text;
+
+                    table.insert(resource_files, path.absolute(file_path, target:scriptdir() .. "/res/"))
+                end
+            end
+        end
+    end
+
+    local resources_c_path_mtime = os.mtime(resources_c_path);
+    local resources_lua_path = resources_path:gsub("xml", "lua")
+
+    for _, res_file in ipairs(resource_files) do
+        local res_file_mtime = os.mtime(res_file)
+        if (res_file_mtime == 0 or res_file_mtime > resources_c_path_mtime) then
+            local prepare = import(path.basename(resources_path):gsub("%.", "_"), {
+                rootdir = path.directory(resources_lua_path),
+                try = true
+            })
+            if prepare then
+                prepare.run(target)
+            end
+            os.execv("glib-compile-resources",
+                table.join(
+                    {"--generate-source", "--sourcedir=" .. path.directory(resources_path),
+                     "--target=" .. resources_c_path, resources_path}, opt))
+
+            break
+        end
+    end
 
     target:add("files", resources_c_path)
 end

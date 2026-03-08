@@ -51,43 +51,6 @@ do
         local utils = import("../../utils")
         local gnome = import("../../gnome")
 
-        import("core.base.xml")
-
-        if is_mode("debug") then
-            local sep = is_host("windows") and ";" or ":"
-            local G_RESOURCE_OVERLAYS = {}
-
-            for _, filepath in ipairs(os.files(target:scriptdir() .. "/res/*.gres.xml")) do
-                local gresource = xml.loadfile(filepath)
-
-                for gresource_index in ipairs(gresource.children) do
-                    local gresource_value = gresource.children[gresource_index]
-                    if (gresource_value.name == "gresource") then
-
-                        local prefix = gresource_value.attrs.prefix;
-
-                        for file_index in ipairs(gresource_value.children) do
-                            local file_value = gresource_value.children[file_index]
-                            if (file_value.name == "file") then
-                                local file_path = file_value.children[1].text;
-
-                                local alias = file_value.attrs and file_value.attrs.alias or nil;
-
-                                local res_path = prefix .. "/" .. (alias and alias or file_path)
-
-                                table.insert(G_RESOURCE_OVERLAYS,
-                                    res_path .. "=" .. path.absolute(file_path, target:scriptdir() .. "/res/"))
-                            end
-                        end
-                    end
-                end
-            end
-
-            if #G_RESOURCE_OVERLAYS > 0 then
-                target:add("runenvs", "G_RESOURCE_OVERLAYS", G_RESOURCE_OVERLAYS)
-            end
-        end
-
         if not os.isfile(target:scriptdir() .. "/res/glib-2.0/schemas/gschemas.compiled") then
             gnome.compile_schemas(target:scriptdir() .. "/res/glib-2.0/schemas")
         end
